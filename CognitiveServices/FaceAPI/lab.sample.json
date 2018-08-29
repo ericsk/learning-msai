@@ -1,0 +1,17 @@
+[
+    {
+        "name": "Person1",
+        "faces": [
+            "PHOTO_URL_1",
+            "PHOTO_URL_2"
+        ]
+    },
+    {
+        "name": "Person2",
+        "faces": [
+            "PHOTO_URL_1",
+            "PHOTO_URL_2",
+            "PHOTO_URL_3"
+        ]
+    }
+]

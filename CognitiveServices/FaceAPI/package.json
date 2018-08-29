@@ -1,0 +1,20 @@
+{
+    "name": "face-identification-lab",
+    "version": "1.0.0",
+    "scripts": {
+        "build": "tsc",
+        "start": "npm run build && node dist/app.js",
+        "identify": "npm run build && node dist/identify.js"
+    },
+    "dependencies": {
+        "request": "^2.85.0",
+        "request-promise-native": "^1.0.5"
+    },
+    "devDependencies": {
+        "@types/node": "^10.0.2",
+        "@types/request": "^2.47.0",
+        "@types/request-promise": "^4.1.41",
+        "ts-node": "^6.0.2",
+        "typescript": "^2.8.3"
+    }
+}
