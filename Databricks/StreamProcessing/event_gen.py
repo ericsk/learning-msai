@@ -9,9 +9,9 @@ from azure.eventhub import EventHubClient, Sender, EventData
 
 DELAY = 1
 
-ADDRESS = 'amqps://<NAMESPACE>.servicebus.windows.net/<HUBNAME>'
-USER = ''
-KEY = ''
+ADDRESS = 'amqps://NAMESPACE.servicebus.windows.net/HUBNAME'
+USER = 'POLICY_NAME'
+KEY = 'POLICY_KEY'
 
 def get_logger(level):
     azure_logger = logging.getLogger("azure")
@@ -72,17 +72,19 @@ class FakeUser(object):
         params['client_event_time'] = int(time.time())
         payload = {
             'eventName' : 'installEvent',
+            'eventTime' : int(time.time()),
             'eventParams' : params
         }
         self.send_event(payload)
     
     def purchase(self):
         params = self.create_base_event()
-        params['bundleId'] = random.choice(self.packages.keys())
+        params['bundleId'] = random.choice(list(self.packages.keys()))
         params['amount'] = self.packages[params['bundleId']]
         params['client_event_time'] = int(time.time())
         payload = {
             'eventName' : 'purchaseEvent',
+            'eventTime' : int(time.time()),
             'eventParams' : params
         }
         self.send_event(payload)
@@ -94,6 +96,7 @@ class FakeUser(object):
         params['client_event_time'] = int(time.time())
         payload = {
             'eventName': 'scoreAdjustment',
+            'eventTime' : int(time.time()),
             'eventParams' : params
         }
         self.send_event(payload)
