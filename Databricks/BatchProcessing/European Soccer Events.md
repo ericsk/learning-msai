@@ -32,13 +32,13 @@ This sample comes from [Databricks Resources](https://databricks.com/resources/t
 
     ```python
     (cmd7)
-    eventsDF = (spark.read.csv("/FileStore/tables/events.csv",
+    eventsDf = (spark.read.csv("/FileStore/tables/events.csv",
     ...
     ```
 
     ```python
     (cmd8)
-    gameInDF = (spark.read.csv("/FileStore/tables/ginf.csv",
+    gameInDf = (spark.read.csv("/FileStore/tables/ginf.csv",
     ...
     ```
 
