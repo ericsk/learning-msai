@@ -171,4 +171,76 @@ println(s"Root-Mean-Square-Error on our test set: ${rmse}")
 // COMMAND ----------
 
 display(dataTrain.select("hr", "cnt"))
+
+// COMMAND ----------
+
 display(predictions.select("hr", "prediction"))
+
+// COMMAND ----------
+
+// MAGIC %md
+// MAGIC ### 把預測結果儲存到 SQL Data Warehouse 中
+// MAGIC 
+// MAGIC 提供可從 Azure Databricks 存取 Azure 儲存體帳戶的組態。
+
+// COMMAND ----------
+
+val blobStorage = "STORAGE_ACCOUNT_NAME.blob.core.windows.net"
+val blobContainer = "CONTAINER_NAME"
+val blobAccessKey =  "STORAGE_ACCOUNT_KEY"
+
+// COMMAND ----------
+
+// MAGIC %md
+// MAGIC 指定在 Azure Databricks 與 Azure SQL Data Warehouse 之間移動資料所用的暫存資料夾。
+
+// COMMAND ----------
+
+ val tempDir = "wasbs://" + blobContainer + "@" + blobStorage +"/tempDirs"
+
+// COMMAND ----------
+
+// MAGIC %md
+// MAGIC 執行下列程式碼片段，儲存組態中的 Azure Blob 儲存體存取金鑰。 這可確保您不必在 Notebook 中以純文字保留存取金鑰。
+
+// COMMAND ----------
+
+val acntInfo = "fs.azure.account.key."+ blobStorage
+ sc.hadoopConfiguration.set(acntInfo, blobAccessKey)
+
+// COMMAND ----------
+
+// MAGIC %md
+// MAGIC 提供用來連線至 Azure SQL 資料倉儲執行個體的值。 您必須已建立屬於必要條件的 SQL 資料倉儲。
+
+// COMMAND ----------
+
+//SQL Data Warehouse related settings
+ val dwDatabase = "DATABASE_NAME"
+ val dwServer = "DATABASE_SERVER_HOST" 
+ val dwUser = "USERNAME"
+ val dwPass = "PASSWORD"
+ val dwJdbcPort =  "1433"
+ val dwJdbcExtraOptions = "encrypt=true;trustServerCertificate=true;hostNameInCertificate=*.database.windows.net;loginTimeout=30;"
+ val sqlDwUrl = "jdbc:sqlserver://" + dwServer + ":" + dwJdbcPort + ";database=" + dwDatabase + ";user=" + dwUser+";password=" + dwPass + ";$dwJdbcExtraOptions"
+ val sqlDwUrlSmall = "jdbc:sqlserver://" + dwServer + ":" + dwJdbcPort + ";database=" + dwDatabase + ";user=" + dwUser+";password=" + dwPass
+
+// COMMAND ----------
+
+// MAGIC %md
+// MAGIC 執行下列程式碼片段，將已轉換的資料框架 predictions 以資料表形式載入 SQL 資料倉儲中。 此程式碼片段會在 SQL 資料庫中建立名為 SampleTable 的資料表。 請注意，Azure SQL DW 需要主要金鑰。 您可以在 SQL Server Management Studio 中執行 "CREATE MASTER KEY;" 命令，以建立主要金鑰。
+
+// COMMAND ----------
+
+spark.conf.set(
+   "spark.sql.parquet.writeLegacyFormat",
+   "true")
+
+predictions.drop("rawFeatures").drop("features").write
+     .format("com.databricks.spark.sqldw")
+     .option("url", sqlDwUrlSmall) 
+     .option("dbtable", "Predictions")
+     .option( "forward_spark_azure_storage_credentials","True")
+     .option("tempdir", tempDir)
+     .mode("overwrite")
+     .save()
